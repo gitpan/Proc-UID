@@ -10,8 +10,9 @@ BEGIN {
 		getruid geteuid getrgid getegid
 		setruid seteuid setrgid setegid
 		getsuid getsgid
-		setsuid
-		setuid_permanent
+		setsuid setsgid
+		drop_uid_temp drop_uid_perm restore_uid
+		drop_gid_temp drop_gid_perm restore_gid
 	);
 	
 	plan tests => @subs_to_test + $EXTRA_TESTS;
