@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -wT
 use strict;
 use Test;
 my @subs_to_test;
@@ -9,14 +9,18 @@ BEGIN {
 	@subs_to_test= qw(
 		getruid geteuid getrgid getegid
 		setruid seteuid setrgid setegid
-		getsuid getsgid
-		setsuid setsgid
+		getsuid getsgid setsuid setsgid
+		suid_is_cached
 		drop_uid_temp drop_uid_perm restore_uid
 		drop_gid_temp drop_gid_perm restore_gid
 	);
 	
 	plan tests => @subs_to_test + $EXTRA_TESTS;
 }
+
+# These are for clean-testing with older Perls when using taint.
+use lib "blib/lib";
+use lib "blib/arch";
 
 use Proc::UID;
 

@@ -13,6 +13,7 @@ Proc::UID - Manipulate a variety of UID and GID settings.
 	drop_gid_perm($new_gid); # Throws an exception on failure.
 	drop_uid_perm($new_uid); # Throws an exception on failure.
 
+	print "Saved-UIDs are cached\n" if suid_is_cached();
 
 =head1 WARNING
 
@@ -183,6 +184,14 @@ Copyright (c) 2004 Paul Fenwick.  All rights reserved.  This
 program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
+=head1 TESTING STRATEGY
+
+Proc::UID's testing strategy is designed to be very complete.  Should
+any tests fail when building Proc::UID on your system, then it is
+recommended that you do not use Proc::UID.
+
+For complete testing, Proc::UID's tests need to run as root.
+
 =head1 SEE ALSO
 
 L<perlsec> and L<perlvar>
@@ -194,35 +203,38 @@ L<Setuid Demystified|http://www.cs.berkeley.edu/~hchen/paper/usenix02.html>
 package Proc::UID;
 use strict;
 use warnings;
-use XSLoader;
+# use XSLoader;
+use DynaLoader;
 use Exporter;
 use Carp;
 use vars qw/$VERSION @ISA @EXPORT_OK $SUID $SGID $EUID $RUID $EGID $RGID
 	    %EXPORT_TAGS/;
 
-$VERSION = 0.03;
-@ISA = qw(Exporter);
+$VERSION = 0.04;
+@ISA = qw(Exporter DynaLoader);
 @EXPORT_OK = qw(	getruid geteuid getrgid getegid
 			setruid seteuid setrgid setegid
-			getsuid getsgid
-			setsuid setsgid
+			getsuid getsgid setsuid setsgid
+			suid_is_cached
 			drop_uid_temp drop_uid_perm restore_uid
 			drop_gid_temp drop_gid_perm restore_gid
 			$RUID $EUID $RGID $EGID $SUID $SGID);
 
 %EXPORT_TAGS = (
-	vars  => qw($RUID $EUID $RGID $EGID $SUID $SGID),
-	funcs => qw(getruid geteguid getrgid getegid
+	vars  => [qw(	$RUID $EUID $RGID $EGID $SUID $SGID)],
+	funcs => [qw(	getruid geteuid getrgid getegid
 			setruid seteuid setrgid setegid
-			getsuid getsgid
-			setsuid setsgid
+			getsuid getsgid setsuid setsgid
+			suid_is_cached
 			drop_uid_temp drop_uid_perm restore_uid
 			drop_gid_temp drop_gid_perm restore_gid
-	),
+	)],
 );
 
 # Most of our hard work is done in XS.
-XSLoader::load 'Proc::UID';
+# XSLoader::load 'Proc::UID';
+
+bootstrap Proc::UID;
 
 # Ties for SUID/SGID
 
