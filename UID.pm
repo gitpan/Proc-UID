@@ -32,7 +32,7 @@ However most modern Unix systems also have a concept of saved UIDs.
 This module provides a consistent and logical interface to real,
 effective, and saved UIDs and GIDs.  It also provides a way to
 permanently drop privileges to that of a given user, a process
-which C<$<lt> = $E<gt> = $uid>' does not guarantee, and the exact syntax
+which C<$E<lt> = $E<gt> = $uid> does not guarantee, and the exact syntax
 of which may vary from between operating systems.
 
 C<Proc::UID> is also very pedantic about making sure that operations
@@ -200,7 +200,7 @@ use Carp;
 use vars qw/$VERSION @ISA @EXPORT_OK $SUID $SGID $EUID $RUID $EGID $RGID
 	    %EXPORT_TAGS/;
 
-$VERSION = 0.02;
+$VERSION = 0.03;
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(	getruid geteuid getrgid getegid
 			setruid seteuid setrgid setegid
