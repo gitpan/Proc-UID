@@ -17,12 +17,13 @@ Proc::UID - Manipulate a variety of UID and GID settings.
 
 =head1 WARNING
 
-This release of Proc::UID is for testing and review purposes only.
-Please do not use it in production code.  The interface may change,
-and the underlying code has not yet been rigourously tested.
+If your code is running with additional privileges, it is recommended
+that you I<always> carefully test and audit your code, including
+this module if you use it.
 
-If you discover any of the included tests fail, or that any other
-problems with the code, please contact Paul Fenwick, pjf@cpan.org.
+This module is provided "as is", without warranty of any kind, either
+express or implied, including, but limited to, the implied warranties
+of merchantability and fitness for a particular purpose.
 
 =head1 DESCRIPTION
 
@@ -145,7 +146,7 @@ variable in Perl.
 
 =item B<getruid()> / B<getrgid()>
 
-=item B<getsuid()> / B<getsuid()>
+=item B<getsuid()> / B<getsgid()>
 
 Return the effective, real, or saved user-id/group-id respectively.
 These functions will always make a system call to get the current
@@ -160,6 +161,21 @@ value.
 Set the effective, real, or saved user-id/group-id respectively.
 If the operation fails, an exception will be thrown.
 
+=item suid_is_cached()
+
+Not all systems support direct manipulation of the saved UID, or
+require use of system calls which C<Proc::UID> does not yet
+understand.
+
+Since the saved UID is always equal to the effective UID when a
+process starts, C<Proc::UID> can infer the value of the saved
+UID even if it can't read it directly.  If this is the case,
+then C<suid_is_cached> will return true.
+
+If C<suid_is_cached> returns false, then you're running on a
+system where C<Proc::UID> knows how to directly manipulate saved
+UIDs.
+
 =back
 
 =head1 BUGS
@@ -168,51 +184,50 @@ Many operating systems have different interfaces into their
 extra UIDs.  This module has not yet been tested under all of
 them.
 
-The current implementation of this module assumes the presence
-of a C<setresuid> call.  This does not exist on all operating
-systems.
-
 The module does not manipulate or make available access to any
 other operating-system-specific privileges, such as the filesystem
 UID under Linux.
 
-=head1 AUTHOR
+=head1 LICENSE
 
-Paul Fenwick	pjf@cpan.org
-
-Copyright (c) 2004 Paul Fenwick.  All rights reserved.  This
-program is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+Copyright (c) 2004-2008 Paul Fenwick E<lt>pjf@cpan.orgE<gt>.  All
+rights reserved.  This program is free software; you can redistribute
+it and/or modify it under the same terms as Perl itself.
 
 =head1 TESTING STRATEGY
 
-Proc::UID's testing strategy is designed to be very complete.  Should
-any tests fail when building Proc::UID on your system, then it is
-recommended that you do not use Proc::UID.
+Proc::UID's testing strategy is intended to be very complete.  Should
+any tests fail when building C<Proc::UID> on your system, then it is
+recommended that you do not use C<Proc::UID>, and report the failing
+tests to the author.
 
-For complete testing, Proc::UID's tests need to run as root.
+For complete testing, C<Proc::UID>'s tests need to run as root.
 
 =head1 SEE ALSO
 
 L<perlsec> and L<perlvar>
 
-L<Setuid Demystified|http://www.cs.berkeley.edu/~hchen/paper/usenix02.html>
+Perl Training Australia's I<Perl Security> course manual,
+available from L<http://perltraining.com.au/notes.html>
+
+Setuid Demystified, L<http://www.cs.berkeley.edu/~hchen/paper/usenix02.html>
+
+L<Unix::SavedIDs>, L<Unix::SetUser>
 
 =cut
 
 package Proc::UID;
 use strict;
 use warnings;
-# use XSLoader;
+use 5.006;
 use DynaLoader;
 use Exporter;
 use Carp;
-use vars qw/$VERSION @ISA @EXPORT_OK $SUID $SGID $EUID $RUID $EGID $RGID
-	    %EXPORT_TAGS/;
+use vars qw($SUID $SGID $EUID $RUID $EGID $RGID);
 
-$VERSION = 0.04;
-@ISA = qw(Exporter DynaLoader);
-@EXPORT_OK = qw(	getruid geteuid getrgid getegid
+our $VERSION = 0.05;
+our @ISA = qw(Exporter DynaLoader);
+our @EXPORT_OK = qw(	getruid geteuid getrgid getegid
 			setruid seteuid setrgid setegid
 			getsuid getsgid setsuid setsgid
 			suid_is_cached
@@ -220,7 +235,7 @@ $VERSION = 0.04;
 			drop_gid_temp drop_gid_perm restore_gid
 			$RUID $EUID $RGID $EGID $SUID $SGID);
 
-%EXPORT_TAGS = (
+our %EXPORT_TAGS = (
 	vars  => [qw(	$RUID $EUID $RGID $EGID $SUID $SGID)],
 	funcs => [qw(	getruid geteuid getrgid getegid
 			setruid seteuid setrgid setegid
